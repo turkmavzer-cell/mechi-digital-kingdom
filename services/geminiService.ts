@@ -2,6 +2,7 @@ import { GoogleGenAI, Modality } from "@google/genai";
 import { AppState, OutfitState, OutfitImages, OptionItem, CarpetState, PatternState, VariantState, GlobalSettings, ExtraToolsState, EntertainmentState, InteriorState, TattooState, MockupState } from '../types';
 import { CATEGORIES, OUTFIT_CONCEPTS, MODEL_DETAILS, KIDS_CARPET_GROUPS, REAL_CARPET_GROUPS, PATTERN_CATEGORIES, VARIANT_THEMES, OUTFIT_WEAR_TYPES, OUTFIT_VIEWS, OUTFIT_AGES, ENT_CHARACTERS, ENT_ACTIONS, ENT_MOODS, ENT_SETTINGS, INT_STYLES, INT_ROOMS, INT_MATERIALS, INT_COLORS, TATTOO_STYLES, TATTOO_AREAS, MOCKUP_PRODUCTS, MOCKUP_VIEWS, MOCKUP_TEAMS, MOCKUP_NUMBERS, MOCKUP_MATERIALS, MOCKUP_LOGOS, MOCKUP_DESIGN_STYLES, OUTFIT_SHOE_TYPES, TATTOO_COLORS, TATTOO_MODELS, OUTFIT_COLORS, OUTFIT_BODY_TYPES } from '../constants';
 import { getApiKey } from '../lib/apiKey';
+import { createAI, canGenerate } from '../lib/imageProvider';
 
 const handleGeminiError = (error: any) => {
     const msg = error.toString().toLowerCase();
@@ -39,8 +40,8 @@ export const generateEnhancedImage = async (
   selections: AppState,
   globalSettings?: GlobalSettings
 ): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     
     let imageArray: string[] = [];
     if (originalImages) {
@@ -129,8 +130,8 @@ export const generateEnhancedImage = async (
 
 // ... (Rest of the file preserved)
 export const generateOutfitCombination = async (images: OutfitImages, state: OutfitState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const parts: any[] = [];
     
     let prompt = "!!! SYSTEM MANDATE: STRICT SELECTION ADHERENCE !!!\n";
@@ -333,8 +334,8 @@ try {
 };
 
 export const generateCarpetDesign = async (state: CarpetState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
 
     let prompt = "!!! SYSTEM ROLE: PROFESSIONAL TEXTILE DESIGN ENGINE !!!\n";
     prompt += "TASK: Generate a high-resolution 2D FLAT-LAY carpet design.\n";
@@ -370,8 +371,8 @@ export const generateCarpetDesign = async (state: CarpetState, globalSettings?: 
 };
 
 export const generatePatternChange = async (imageBase64: string | null, state: PatternState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     let prompt = "Task: Texture/Pattern/Style Modification. ";
     const contentsParts: any[] = [];
     
@@ -457,8 +458,8 @@ export const generateVariantOptions = async (
   globalSettings?: GlobalSettings, 
   colorRefImage?: string | null
 ): Promise<string[]> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     const results: string[] = [];
     const theme = VARIANT_THEMES.find(t => t.id === state.selectedTheme);
@@ -490,7 +491,7 @@ export const generateVariantOptions = async (
 };
 
 export const generateSystemChatResponse = async (userMessage: string): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
+    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Sohbet için Ayarlar > Gemini API Anahtarı gerekir.");
     const ai = new GoogleGenAI({ apiKey: getApiKey() });
     try {
         const response = await ai.models.generateContent({ 
@@ -505,8 +506,8 @@ export const generateSystemChatResponse = async (userMessage: string): Promise<s
 };
 
 export const generateExtraToolImage = async (imageBase64: string, state: ExtraToolsState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     let prompt = `Edit image using ${state.activeToolId}: ${state.customPrompt}`;
     const clean = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     try {
@@ -517,8 +518,8 @@ export const generateExtraToolImage = async (imageBase64: string, state: ExtraTo
 };
 
 export const generateEntertainmentImage = async (imageBase64: string, state: EntertainmentState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     let prompt = `Add character to photo: ${state.characterVariant || state.selectedCharacter}. ${state.customPrompt}`;
     const clean = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     try {
@@ -529,8 +530,8 @@ export const generateEntertainmentImage = async (imageBase64: string, state: Ent
 };
 
 export const generateInteriorDesign = async (imageBase64: string, state: InteriorState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     let prompt = `Redesign room: style ${state.selectedStyle}, room ${state.selectedRoomType}. ${state.customPrompt}`;
     const clean = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     try {
@@ -541,8 +542,8 @@ export const generateInteriorDesign = async (imageBase64: string, state: Interio
 };
 
 export const generateOutpainting = async (imageBase64: string, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const prompt = "Seamlessly fill empty space around image, maintain continuity.";
     const clean = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     try {
@@ -553,8 +554,8 @@ export const generateOutpainting = async (imageBase64: string, globalSettings?: 
 };
 
 export const generateCommercialFlatDesign = async (imageBase64: string | null, state: MockupState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const parts: any[] = [];
     
     let prompt = "!!! COMMERCIAL DESIGN ENGINE ACTIVE !!!\n";
@@ -588,8 +589,8 @@ export const generateCommercialFlatDesign = async (imageBase64: string | null, s
 };
 
 export const generateMockup = async (flatDesignBase64: string | null, state: MockupState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const parts: any[] = [];
     
     let prompt = "!!! STRICT COMMERCIAL MOCKUP PROTOCOL: ZERO TOY EFFECT !!!\n";
@@ -650,8 +651,8 @@ export const generateMockup = async (flatDesignBase64: string | null, state: Moc
 };
 
 export const generateKartelaMockup = async (designImageBase64: string | null, logoImageBase64: string | null, state: MockupState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const parts: any[] = [];
     
     let prompt = "!!! PROFESSIONAL TEXTILE SWATCH KARTELA ENGINE !!!\n";
@@ -688,8 +689,8 @@ export const generateKartelaMockup = async (designImageBase64: string | null, lo
 };
 
 export const generateTattooDesign = async (imageBase64: string | null, state: TattooState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const parts: any[] = [];
     
     let prompt = "!!! EXPERT TATTOO DESIGN ENGINE !!!\n";
@@ -732,8 +733,8 @@ export const generateTattooDesign = async (imageBase64: string | null, state: Ta
 };
 
 export const applyTattooToBody = async (designImageBase64: string, state: TattooState, globalSettings?: GlobalSettings): Promise<string> => {
-    if (!getApiKey()) throw new Error("Gemini API anahtarı yok. Ayarlar > Gemini API Anahtarı bölümünden girin.");
-    const ai = new GoogleGenAI({ apiKey: getApiKey() });
+    if (!canGenerate()) throw new Error("Gemini API anahtarı yok. Ayarlar > Görsel Üretimi bölümünden anahtar girin veya ücretsiz modu seçin.");
+    const ai = createAI();
     const parts: any[] = [];
     
     const area = TATTOO_AREAS.find(a => a.id === state.selectedBodyPart);
