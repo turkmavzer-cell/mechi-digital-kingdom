@@ -119,11 +119,13 @@ const App: React.FC = () => {
         else if (showTerminal) setShowTerminal(false);
         else if (showSettings) setShowSettings(false);
         else if (!isLocked && activeTab !== 'editor') setActiveTab('editor');
-        else CapApp.exitApp();
+        else CapApp.exitApp().catch(() => {});
     };
     useEffect(() => {
         const sub = CapApp.addListener('backButton', () => backRef.current());
-        return () => { sub.then(h => h.remove()); };
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') backRef.current(); };
+        window.addEventListener('keydown', onKey);
+        return () => { sub.then(h => h.remove()); window.removeEventListener('keydown', onKey); };
     }, []);
 
     const [appState, setAppState] = useState<AppState>({

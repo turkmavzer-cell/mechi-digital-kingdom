@@ -50,12 +50,20 @@ const generateFree = async (parts: any[], config: any): Promise<string> => {
     // Anahtarsız kullanımda art arda isteklerde 402/429 dönebilir; bekleyip tekrar dene.
     // Pollinations tarayıcıdan gelen anahtarsız istekleri captcha (403) ile engeller; APK'da istek
     // WebView yerine yerel HTTP katmanıyla gönderilir.
+    const desktop = (window as any).mechiDesktop;
     const native = Capacitor.isNativePlatform();
     const headers: Record<string, string> = key ? { Authorization: `Bearer ${key}` } : {};
     let lastStatus = 0;
     for (let attempt = 0; attempt < 5; attempt++) {
         if (attempt > 0) await sleep(12000 * attempt);
-        if (native) {
+        if (desktop) {
+            const res = await desktop.httpGetImage(url, headers);
+            lastStatus = res.status;
+            if (res.status === 200 && res.data) {
+                const bytes = Uint8Array.from(atob(res.data), c => c.charCodeAt(0));
+                return blobToPngBase64(new Blob([bytes], { type: 'image/jpeg' }));
+            }
+        } else if (native) {
             const res = await CapacitorHttp.get({ url, headers, responseType: 'blob', readTimeout: 120000, connectTimeout: 30000 });
             lastStatus = res.status;
             if (res.status === 200 && typeof res.data === 'string' && res.data.length > 100) {

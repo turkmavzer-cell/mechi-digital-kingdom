@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:web": "vite build",
     "build:apk": "vite build && cap sync android",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "desktop": "vite build && electron .",
+    "build:desktop": "vite build && electron-builder --win --publish never"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -24,9 +26,39 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
+  },
+  "main": "electron/main.cjs",
+  "description": "MeChi + masaüstü uygulaması",
+  "author": "MeChi Digital Kingdom",
+  "build": {
+    "appId": "com.mechi.plus.desktop",
+    "productName": "MeChi Plus",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "assets/icon-only.png",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon-only.png",
+      "artifactName": "MeChiPlus-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
