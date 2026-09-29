@@ -19,6 +19,7 @@ import TerminalChat from './components/TerminalChat'; // MeChiChat içeriği bu 
 import { CATEGORIES, TOOL_VARIANTS } from './constants';
 import { AppState, CategoryKey, HistoryItem, GlobalSettings, OptionItem, QueuedEditorTask } from './types';
 import ApiKeyField from './components/ApiKeyField';
+import { App as CapApp } from '@capacitor/app';
 import { generateEnhancedImage } from './services/geminiService';
 
 const BASE_THEMES = [
@@ -106,6 +107,24 @@ const App: React.FC = () => {
     const [manipulatorImage, setManipulatorImage] = useState<string | null>(null);
     const [showSourceModal, setShowSourceModal] = useState(false);
     const [showPromptModal, setShowPromptModal] = useState(false);
+
+    // Android geri hareketi / geri tuşu: önce en üstteki katmanı kapat, sonra editöre dön, en son uygulamadan çık.
+    const backRef = useRef<() => void>(() => {});
+    backRef.current = () => {
+        if (zoomedImage) setZoomedImage(null);
+        else if (manipulatorImage) setManipulatorImage(null);
+        else if (showSourceModal) setShowSourceModal(false);
+        else if (showPromptModal) setShowPromptModal(false);
+        else if (infoModule) setInfoModule(null);
+        else if (showTerminal) setShowTerminal(false);
+        else if (showSettings) setShowSettings(false);
+        else if (!isLocked && activeTab !== 'editor') setActiveTab('editor');
+        else CapApp.exitApp();
+    };
+    useEffect(() => {
+        const sub = CapApp.addListener('backButton', () => backRef.current());
+        return () => { sub.then(h => h.remove()); };
+    }, []);
 
     const [appState, setAppState] = useState<AppState>({
         selectedTool: 'none',
